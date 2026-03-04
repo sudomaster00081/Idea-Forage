@@ -44,7 +44,7 @@ export default function App() {
     const saved = localStorage.getItem('ideaforge_config');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Migrate old or missing model names to the new recommended models
+      // Force migration to the new default model if using an old default or invalid model
       const validModels = [
         'gemini-3.1-pro-preview',
         'gemini-3.1-flash-lite-preview',
@@ -53,12 +53,13 @@ export default function App() {
         'gemini-2.5-flash',
         'gemini-2.5-flash-lite'
       ];
-      if (parsed.provider === 'gemini' && (!parsed.model || !validModels.includes(parsed.model))) {
-        parsed.model = 'gemini-3-flash-preview';
+      const isOldDefault = parsed.model === 'gemini-3-flash-preview' || parsed.model === 'gemini-flash-latest';
+      if (parsed.provider === 'gemini' && (!parsed.model || !validModels.includes(parsed.model) || isOldDefault)) {
+        parsed.model = 'gemini-2.5-flash';
       }
       return parsed;
     }
-    return { provider: 'gemini', model: 'gemini-3-flash-preview' };
+    return { provider: 'gemini', model: 'gemini-2.5-flash' };
   });
 
   useEffect(() => {
@@ -352,7 +353,7 @@ export default function App() {
                   <div className="grid grid-cols-2 gap-2">
                     <ProviderButton 
                       active={config.provider === 'gemini'} 
-                      onClick={() => setConfig({ ...config, provider: 'gemini' })}
+                      onClick={() => setConfig({ ...config, provider: 'gemini', model: 'gemini-2.5-flash' })}
                       icon={Globe}
                       label="Gemini"
                       sub="Default (Free)"
@@ -453,11 +454,11 @@ export default function App() {
                             </>
                           ) : (
                             <>
+                              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                               <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
                               <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash-Lite Preview</option>
                               <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
                               <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                               <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
                             </>
                           )}
