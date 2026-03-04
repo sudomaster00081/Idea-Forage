@@ -44,13 +44,21 @@ export default function App() {
     const saved = localStorage.getItem('ideaforge_config');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Migrate old or missing model names to the most stable alias
-      if (parsed.provider === 'gemini' && (!parsed.model || parsed.model.includes('gemini-2.0') || parsed.model.includes('gemini-3'))) {
-        parsed.model = 'gemini-flash-latest';
+      // Migrate old or missing model names to the new recommended models
+      const validModels = [
+        'gemini-3.1-pro-preview',
+        'gemini-3.1-flash-lite-preview',
+        'gemini-3-flash-preview',
+        'gemini-2.5-pro',
+        'gemini-2.5-flash',
+        'gemini-2.5-flash-lite'
+      ];
+      if (parsed.provider === 'gemini' && (!parsed.model || !validModels.includes(parsed.model))) {
+        parsed.model = 'gemini-3-flash-preview';
       }
       return parsed;
     }
-    return { provider: 'gemini', model: 'gemini-flash-latest' };
+    return { provider: 'gemini', model: 'gemini-3-flash-preview' };
   });
 
   useEffect(() => {
@@ -445,9 +453,12 @@ export default function App() {
                             </>
                           ) : (
                             <>
-                              <option value="gemini-flash-latest">Gemini Flash (Recommended)</option>
-                              <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
-                              <option value="gemini-3-flash-preview">Gemini 3 Flash</option>
+                              <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
+                              <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash-Lite Preview</option>
+                              <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                              <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                              <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
                             </>
                           )}
                         </select>

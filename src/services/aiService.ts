@@ -63,8 +63,8 @@ async function analyzeWithGemini(idea: string, customKey?: string, modelName?: s
   const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.API_KEY || "";
   if (!apiKey) throw new Error("Gemini API Key not found. Please ensure it is set in your environment.");
   
-  // Use the most stable alias to avoid 404 errors
-  const DEFAULT_MODEL = "gemini-flash-latest";
+  // Use the recommended stable model from platform guidelines
+  const DEFAULT_MODEL = "gemini-3-flash-preview";
   const selectedModel = (modelName && modelName.trim() !== "") ? modelName : DEFAULT_MODEL;
   
   const ai = new GoogleGenAI({ apiKey });
