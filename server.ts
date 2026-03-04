@@ -3,7 +3,6 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import * as dotenv from "dotenv";
-import { GoogleGenAI, Type } from "@google/genai";
 
 dotenv.config();
 
@@ -24,58 +23,6 @@ Provide a comprehensive analysis including:
 
 Return the response in JSON format with the following keys:
 marketDemand, competitorLandscape, techFeasibility, costEstimation, monetizationStrategy, mvpRoadmap, swot (object with strengths, weaknesses, opportunities, threats arrays), confidenceScore (number), debateSummary.`;
-
-async function analyzeWithGemini(idea: string, customKey?: string, modelName?: string) {
-  const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.API_KEY || "";
-  if (!apiKey) throw new Error("Gemini API Key not found on server.");
-  
-  const selectedModel = modelName || "gemini-3-flash-preview";
-  const ai = new GoogleGenAI({ apiKey });
-  
-  const response = await ai.models.generateContent({
-    model: selectedModel,
-    contents: [{ parts: [{ text: getPrompt(idea) }] }],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          marketDemand: { type: Type.STRING },
-          competitorLandscape: { type: Type.STRING },
-          techFeasibility: { type: Type.STRING },
-          costEstimation: { type: Type.STRING },
-          monetizationStrategy: { type: Type.STRING },
-          mvpRoadmap: { type: Type.STRING },
-          swot: {
-            type: Type.OBJECT,
-            properties: {
-              strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-              weaknesses: { type: Type.ARRAY, items: { type: Type.STRING } },
-              opportunities: { type: Type.ARRAY, items: { type: Type.STRING } },
-              threats: { type: Type.ARRAY, items: { type: Type.STRING } },
-            },
-            required: ["strengths", "weaknesses", "opportunities", "threats"],
-          },
-          confidenceScore: { type: Type.NUMBER },
-          debateSummary: { type: Type.STRING },
-        },
-        required: [
-          "marketDemand",
-          "competitorLandscape",
-          "techFeasibility",
-          "costEstimation",
-          "monetizationStrategy",
-          "mvpRoadmap",
-          "swot",
-          "confidenceScore",
-          "debateSummary",
-        ],
-      },
-    },
-  });
-
-  return JSON.parse(response.text || "{}");
-}
 
 async function analyzeWithOpenAI(idea: string, apiKey: string, model: string = "gpt-4o") {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -152,9 +99,6 @@ async function startServer() {
     try {
       let result;
       switch (config.provider) {
-        case 'gemini':
-          result = await analyzeWithGemini(idea, config.apiKey, config.model);
-          break;
         case 'openai':
           if (!config.apiKey) throw new Error("OpenAI API Key is required");
           result = await analyzeWithOpenAI(idea, config.apiKey, config.model);
