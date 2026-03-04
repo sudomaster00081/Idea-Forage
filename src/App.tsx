@@ -42,7 +42,15 @@ export default function App() {
   // AI Configuration
   const [config, setConfig] = useState<AIConfig>(() => {
     const saved = localStorage.getItem('ideaforge_config');
-    return saved ? JSON.parse(saved) : { provider: 'gemini' };
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migrate old or missing model names to the most stable alias
+      if (parsed.provider === 'gemini' && (!parsed.model || parsed.model.includes('gemini-2.0') || parsed.model.includes('gemini-3'))) {
+        parsed.model = 'gemini-flash-latest';
+      }
+      return parsed;
+    }
+    return { provider: 'gemini', model: 'gemini-flash-latest' };
   });
 
   useEffect(() => {
@@ -437,8 +445,8 @@ export default function App() {
                             </>
                           ) : (
                             <>
-                              <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                              <option value="gemini-2.0-pro-exp-02-05">Gemini 2.0 Pro</option>
+                              <option value="gemini-flash-latest">Gemini Flash (Recommended)</option>
+                              <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
                               <option value="gemini-3-flash-preview">Gemini 3 Flash</option>
                             </>
                           )}
