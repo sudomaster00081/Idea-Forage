@@ -118,12 +118,7 @@ export async function analyzeIdea(idea: string, config: AIConfig): Promise<Analy
     return new Promise((resolve) => setTimeout(() => resolve(OFFLINE_RESPONSE), 1500));
   }
 
-  // Gemini is handled on the frontend as per platform guidelines
-  if (config.provider === 'gemini') {
-    return analyzeWithGemini(idea, config.apiKey, config.model);
-  }
-
-  // Other providers are handled on the backend for security
+  // All AI providers (including Gemini) are now handled on the backend for security
   const response = await fetch("/api/analyze", {
     method: "POST",
     headers: {
